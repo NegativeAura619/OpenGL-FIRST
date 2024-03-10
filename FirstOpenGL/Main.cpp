@@ -71,6 +71,31 @@ int main()
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader); // usuwanie shaderow poniewa¿ s¹ juz w programie 
 
+	GLuint VAO,VBO; // przechowuje dane z vertexu
+
+	glGenVertexArrays(1, &VAO);// generowanie danych do VAO
+
+	glGenBuffers(1, &VBO); // generuje 1 obiekt i linkuje go z VBO
+
+	glBindVertexArray(VAO);//to samo co VBO
+
+	glBindBuffer(GL_ARRAY_BUFFER, VBO); // binduje buffer
+	//uwaga wazne jest by generowac VAO przed VBO !!! 
+
+
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW); // static oznacza ze vertices zostanie zmodyfikowany tylk oraz 
+	//draw oznacza ze vertices  zostanie zmodyfikowany by utworzyc obraz na ekranie
+	// jest jeszcze read oraz copy 
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0); // komunikuje sie z vertex shaderem
+	// pozycja atrybutu, ile wartosci mamy w wertexie (3 poniewaz robimy trojkat),data type vortexu , ostatni ma znaczenie gdy mamy koordynaty w intach
+	// nastepnie ilosc danych miedzy vortexami mamy 3 floaty wiec wpisujemy 3 * rozmiar floata
+	//offset pointer ktory wskazuje gdzie vortex zaczyna array, jako ze nasz zaczyna sie na poczatku tabeli dajemy wartosc void 
+	glEnableVertexAttribArray(0); // uruchamia dane vertexu ktore wspialismy wyzej, dajemy 0 poniewaz to jest pozycja naszego atrybutu vortexa
+
+	glBindBuffer(GL_ARRAY_BUFFER,0);
+	glBindVertexArray(0); // przypisuje im 0 by nie pomylic sie i nie uzyc ich jako funkcji co zjebie program
+
 
 	glClearColor(0.07f, 0.13f, 0.17f, 1.0f); // kolor nastepnej klatki 
 	glClear(GL_COLOR_BUFFER_BIT); //inicjalizacja koloru
@@ -78,8 +103,19 @@ int main()
 
 	while (!glfwWindowShouldClose(window))
 	{
+		glClearColor(0.07f, 0.13f, 0.17f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT);
+		glUseProgram(shaderProgram);
+		glBindVertexArray(VAO);
+		glDrawArrays(GL_TRIANGLES, 0, 3);
+		glfwSwapBuffers(window); // updatujemy obraz co klatke
+
 		glfwPollEvents(); // procesowanie parametrow okienka
 	}
+
+	glDeleteVertexArrays(1, &VAO);
+	glDeleteBuffers(1, &VBO);
+	glDeleteProgram(shaderProgram);
 
 
 
