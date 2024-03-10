@@ -19,8 +19,17 @@ int main()
 		glfwTerminate();
 		return -1;
 	}
-
 	glfwMakeContextCurrent(window); // wymusza uzywanie okienka ktore zainicjowalismy
+
+	gladLoadGL();
+
+
+
+	glViewport(0,0, 800,800); //koordynaty obszaru ktory chcemy wyswietlac
+
+	glClearColor(0.07f, 0.13f, 0.17f, 1.0f); // kolor nastepnej klatki 
+	glClear(GL_COLOR_BUFFER_BIT); //inicjalizacja koloru
+	glfwSwapBuffers(window); // swap klatki 
 
 	while (!glfwWindowShouldClose(window))
 	{
