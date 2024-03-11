@@ -1,5 +1,5 @@
 #include <iostream>
-#include <glad/glad.h>
+#include <glad/glad.h> // glad musi byc zalinkowany przed GLFW	
 #include <GLFW/glfw3.h>
 
 // Vertex Shader source code
@@ -18,26 +18,33 @@ const char* fragmentShaderSource = "#version 330 core\n"
 "}\n\0";
 
 int main()
-{
+{  
+
+	void framebuffer_size_callback(GLFWwindow * window, int width, int height);
+	void processInput(GLFWwindow * window);
+
+	const unsigned int SCR_WIDTH = 800; // CONST WINDOW WIDTH 
+	const unsigned int SCR_HEIGHT = 800; // CONST WINDOW HEIGHT 
+
 
 	glfwInit(); // inicjalizacja okienka
-
-
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3); //wybor wersji
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // wybor profilu openGL
 
 
+	
 	GLfloat vertices[] =
 	{
 		-0.5f, -0.5f * float(sqrt(3)) / 3, 0.0f, // left corner
 		 0.5f, -0.5f * float(sqrt(3)) / 3, 0.0f, // right corner 
 		 0.0f,  0.5f * float(sqrt(3)) * 2 / 3, 0.0f, // top corner
 	};
+	
+	
 
 
-
-	GLFWwindow* window = glfwCreateWindow(800, 800, "YoutubeOpenGl", NULL, NULL); // parametry okienka  szerokosc,wysokosc,nazwa,fullscreen i ?
+	GLFWwindow* window = glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "YoutubeOpenGl", NULL, NULL); // parametry okienka  szerokosc,wysokosc,nazwa,fullscreen i ?
 	if (window == NULL) 
 	{
 		std::cout << "Failed to create GLFW window" << std::endl; // sprawdza czy okienko sie nie crashuje	
@@ -45,19 +52,18 @@ int main()
 		return -1;
 	}
 	glfwMakeContextCurrent(window); // wymusza uzywanie okienka ktore zainicjowalismy
-
 	gladLoadGL(); // ladowanie glada by konfigurowac opengl
+	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
 
 
-	glViewport(0,0, 800,800); //koordynaty obszaru ktory chcemy wyswietlac
-
-	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER); //tworzymy shader
-	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL); // przypisujemy parametry
-	glCompileShader(vertexShader); // kompilacja shadera
+	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER); //creating shader stored in GLuint
+	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL); // reference value,how many strings for shader, source code point
+	glCompileShader(vertexShader); // compilating shader into the machine code sow gpu can understand it 
 
 
-	GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER); // To samo co wy¿ej tylko z fragmentami
+
+	GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER); //creating shader stored in GLuint
 	glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
 	glCompileShader(fragmentShader); 
 
@@ -66,7 +72,7 @@ int main()
 	glAttachShader(shaderProgram, vertexShader);
 	glAttachShader(shaderProgram, fragmentShader); // dodawanie shaderow do Shader programu 
 
-	glLinkProgram(shaderProgram); // wrapowanie shader programu
+	glLinkProgram(shaderProgram); // Creating shader program executable and linking it so it can run over Vertexes
 
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader); // usuwanie shaderow poniewa¿ s¹ juz w programie 
@@ -100,6 +106,7 @@ int main()
 	glClearColor(0.07f, 0.13f, 0.17f, 1.0f); // kolor nastepnej klatki 
 	glClear(GL_COLOR_BUFFER_BIT); //inicjalizacja koloru
 	glfwSwapBuffers(window); // swap klatki 
+	
 
 	while (!glfwWindowShouldClose(window))
 	{
@@ -111,15 +118,29 @@ int main()
 		glfwSwapBuffers(window); // updatujemy obraz co klatke
 
 		glfwPollEvents(); // procesowanie parametrow okienka
+		
 	}
 
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
 	glDeleteProgram(shaderProgram);
 
-
-
 	glfwDestroyWindow(window);
 	glfwTerminate(); // wylaczenie okienka
 	return 0;
+
 }
+
+void processInput(GLFWwindow* window)
+{
+	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+		glfwSetWindowShouldClose(window, true);
+}
+
+void framebuffer_size_callback(GLFWwindow* window, int width, int height)
+
+{ // Updating position while resising window
+
+	glViewport(0, 0, width, height);  
+}
+
