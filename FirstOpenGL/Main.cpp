@@ -39,8 +39,19 @@ int main()
 		-0.5f, -0.5f * float(sqrt(3)) / 3, 0.0f, // left corner
 		 0.5f, -0.5f * float(sqrt(3)) / 3, 0.0f, // right corner 
 		 0.0f,  0.5f * float(sqrt(3)) * 2 / 3, 0.0f, // top corner
-	};
+		 -0.5f / 2,0.5f * float(sqrt(3)) /6, 0.0f, // inner left
+		 0.5f / 2, 0.5f * float(sqrt(3)) /6, 0.0f, // inner right 
+		 0.0f, -0.5f * float(sqrt(3))/3, 0.0f // inner down		
+	}; 
+
+
 	
+	GLuint indices[] =
+	{
+		0,3,5, // lower left
+		3,2,4, // lower right 
+		5,4,1 // upper triangle
+	};
 	
 
 
@@ -77,11 +88,11 @@ int main()
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader); // usuwanie shaderow poniewa¿ s¹ juz w programie 
 
-	GLuint VAO,VBO; // przechowuje dane z vertexu
+	GLuint VAO,VBO, EBO; // przechowuje dane z vertexu
 
-	glGenVertexArrays(1, &VAO);// generowanie danych do VAO
-
+	glGenVertexArrays(1, &VAO);//generating 1 object and linking 
 	glGenBuffers(1, &VBO); // generuje 1 obiekt i linkuje go z VBO
+	glGenBuffers(1, &EBO);
 
 	glBindVertexArray(VAO);//to samo co VBO
 
@@ -89,11 +100,17 @@ int main()
 	//uwaga wazne jest by generowac VAO przed VBO !!! 
 
 
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW); // static oznacza ze vertices zostanie zmodyfikowany tylk oraz 
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW); 
+	// adding vertices to our VBO
+	// static oznacza ze vertices zostanie zmodyfikowany tylk oraz 
 	//draw oznacza ze vertices  zostanie zmodyfikowany by utworzyc obraz na ekranie
 	// jest jeszcze read oraz copy 
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0); // komunikuje sie z vertex shaderem
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	// configure vertex attributes so openGL know how to read the VBO
 	// pozycja atrybutu, ile wartosci mamy w wertexie (3 poniewaz robimy trojkat),data type vortexu , ostatni ma znaczenie gdy mamy koordynaty w intach
 	// nastepnie ilosc danych miedzy vortexami mamy 3 floaty wiec wpisujemy 3 * rozmiar floata
 	//offset pointer ktory wskazuje gdzie vortex zaczyna array, jako ze nasz zaczyna sie na poczatku tabeli dajemy wartosc void 
@@ -101,6 +118,7 @@ int main()
 
 	glBindBuffer(GL_ARRAY_BUFFER,0);
 	glBindVertexArray(0); // przypisuje im 0 by nie pomylic sie i nie uzyc ich jako funkcji co zjebie program
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
 
 	glClearColor(0.07f, 0.13f, 0.17f, 1.0f); // kolor nastepnej klatki 
@@ -114,15 +132,18 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT);
 		glUseProgram(shaderProgram);
 		glBindVertexArray(VAO);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+		glDrawElements(GL_TRIANGLES, 9 , GL_UNSIGNED_INT, 0);
 		glfwSwapBuffers(window); // updatujemy obraz co klatke
+		
 
 		glfwPollEvents(); // procesowanie parametrow okienka
+		
 		
 	}
 
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
+	glDeleteBuffers(1, &EBO);
 	glDeleteProgram(shaderProgram);
 
 	glfwDestroyWindow(window);
@@ -131,11 +152,16 @@ int main()
 
 }
 
+/*  
+  MA WYLACZAC OKIENKO NA KLIKNIECIE ESCAPE NIE DZIALA TRZEBA ZATEGOWAC
+
 void processInput(GLFWwindow* window)
 {
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-		glfwSetWindowShouldClose(window, true);
+		glfwSetWindowShouldClose(window, true);       
 }
+*/
+	
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 
